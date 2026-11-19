@@ -68,7 +68,7 @@ python manage.py migrate
 ### 2.1. Gerar e importar os dados
 
 ```bash
-python scripts/seed.py
+python api/scripts/seed.py
 python manage.py import_csv
 ```
 
