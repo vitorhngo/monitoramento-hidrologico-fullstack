@@ -1,12 +1,28 @@
 import { useState } from 'react'
+
 import { mockStations } from './data/stations'
 import { mockSummaries } from './data/summaries'
+import {
+  mockSeries,
+  MOCK_REFERENCE_TIME,
+} from './data/series'
+
 import MeasurementCard from './components/MeasurementCard'
+import HistoryChart from './components/HistoryChart'
+
+import type { Metric, Period } from './types/series'
+
 import './App.css'
 
 function App() {
   const [selectedStationId, setSelectedStationId] =
     useState<number>(mockStations[0].id)
+
+  const [selectedMetric, setSelectedMetric] =
+    useState<Metric>('level')
+
+  const [selectedPeriod, setSelectedPeriod] =
+    useState<Period>(24)
 
   const selectedStation = mockStations.find(
     (station) => station.id === selectedStationId
@@ -15,6 +31,20 @@ function App() {
   const selectedSummary = mockSummaries.find(
     (summary) => summary.stationId === selectedStationId
   )
+
+  const selectedSeries = mockSeries.find(
+    (series) => series.stationId === selectedStationId
+  )
+
+  const startTime =
+    Date.parse(MOCK_REFERENCE_TIME) -
+    selectedPeriod * 60 * 60 * 1000
+
+  const filteredObservations =
+    selectedSeries?.observations.filter(
+      (observation) =>
+        Date.parse(observation.timestamp) >= startTime
+    ) ?? []
 
   return (
     <main>
@@ -89,9 +119,67 @@ function App() {
         <h2 id="historico-titulo">
           Histórico de medições
         </h2>
-        <p>
-          Aqui serão exibidos os gráficos de nível
-          e chuva para o período selecionado.
+
+        <div className="history-controls">
+          <div className="metric-controls">
+            <span className="control-label">Métrica:</span>
+
+            <div className="button-group">
+              <button
+                type="button"
+                className={selectedMetric === 'level' ? 'active' : ''}
+                aria-pressed={selectedMetric === 'level'}
+                onClick={() => setSelectedMetric('level')}
+              >
+                Nível do rio
+              </button>
+
+              <button
+                type="button"
+                className={selectedMetric === 'rain' ? 'active' : ''}
+                aria-pressed={selectedMetric === 'rain'}
+                onClick={() => setSelectedMetric('rain')}
+              >
+                Precipitação
+              </button>
+            </div>
+          </div>
+
+          <div className="period-controls">
+            <span className="control-label">Período:</span>
+
+            <div className="button-group">
+              {([12, 24, 48] as Period[]).map((period) => (
+                <button
+                  key={period}
+                  type="button"
+                  className={
+                    selectedPeriod === period ? 'active' : ''
+                  }
+                  aria-pressed={selectedPeriod === period}
+                  onClick={() => setSelectedPeriod(period)}
+                >
+                  {period} h
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <h3>
+          {selectedMetric === 'level'
+            ? 'Nível do rio (m)'
+            : 'Precipitação (mm/h)'}
+        </h3>
+
+        <HistoryChart
+          observations={filteredObservations}
+          metric={selectedMetric}
+        />
+
+        <p className="history-note">
+          Horários em UTC. Período de demonstração com
+          referência em 19/11/2026 às 12:00 UTC.
         </p>
       </section>
 
