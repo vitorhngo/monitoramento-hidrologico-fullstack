@@ -1,5 +1,5 @@
 import django_filters
-from api.models import Station
+from monitoring.models import Station
 
 
 class StationFilter(django_filters.FilterSet):
