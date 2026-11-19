@@ -1,18 +1,18 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { mockStations } from './data/stations'
 import { mockSummaries } from './data/summaries'
-import {
-  mockSeries,
-  MOCK_REFERENCE_TIME,
-} from './data/series'
+import { getMockHistory } from './services/historyService'
+
+import type { MockScenario } from './services/historyService'
+import type { Metric, Observation, Period } from './types/series'
 
 import MeasurementCard from './components/MeasurementCard'
 import HistoryChart from './components/HistoryChart'
 
-import type { Metric, Period } from './types/series'
-
 import './App.css'
+
+type HistoryStatus = 'loading' | 'success' | 'error'
 
 function App() {
   const [selectedStationId, setSelectedStationId] =
@@ -24,6 +24,19 @@ function App() {
   const [selectedPeriod, setSelectedPeriod] =
     useState<Period>(24)
 
+  const [scenario, setScenario] =
+    useState<MockScenario>('normal')
+
+  const [status, setStatus] =
+    useState<HistoryStatus>('loading')
+
+  const [observations, setObservations] =
+    useState<Observation[]>([])
+
+  const [errorMessage, setErrorMessage] = useState('')
+
+  const [retryCount, setRetryCount] = useState(0)
+
   const selectedStation = mockStations.find(
     (station) => station.id === selectedStationId
   )
@@ -32,19 +45,53 @@ function App() {
     (summary) => summary.stationId === selectedStationId
   )
 
-  const selectedSeries = mockSeries.find(
-    (series) => series.stationId === selectedStationId
-  )
+  useEffect(() => {
+    let cancelled = false
 
-  const startTime =
-    Date.parse(MOCK_REFERENCE_TIME) -
-    selectedPeriod * 60 * 60 * 1000
+    // Impede mostrar dados antigos durante outra consulta.
+    setStatus('loading')
+    setObservations([])
+    setErrorMessage('')
 
-  const filteredObservations =
-    selectedSeries?.observations.filter(
-      (observation) =>
-        Date.parse(observation.timestamp) >= startTime
-    ) ?? []
+    getMockHistory({
+      stationId: selectedStationId,
+      metric: selectedMetric,
+      period: selectedPeriod,
+      scenario,
+    })
+      .then((data) => {
+        if (cancelled) return
+
+        setObservations(data)
+        setStatus('success')
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return
+
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : 'Ocorreu um erro inesperado.'
+        )
+
+        setStatus('error')
+      })
+
+    // Ignora respostas de consultas que já foram substituídas.
+    return () => {
+      cancelled = true
+    }
+  }, [
+    selectedStationId,
+    selectedMetric,
+    selectedPeriod,
+    scenario,
+    retryCount,
+  ])
+
+  function retryHistory() {
+    setRetryCount((previous) => previous + 1)
+  }
 
   return (
     <main>
@@ -57,9 +104,7 @@ function App() {
       </header>
 
       <section aria-labelledby="estacoes-titulo">
-        <h2 id="estacoes-titulo">
-          Estações hidrológicas
-        </h2>
+        <h2 id="estacoes-titulo">Estações hidrológicas</h2>
 
         <label htmlFor="station-select">
           Selecione uma estação:
@@ -116,9 +161,7 @@ function App() {
       </section>
 
       <section aria-labelledby="historico-titulo">
-        <h2 id="historico-titulo">
-          Histórico de medições
-        </h2>
+        <h2 id="historico-titulo">Histórico de medições</h2>
 
         <div className="history-controls">
           <div className="metric-controls">
@@ -153,9 +196,7 @@ function App() {
                 <button
                   key={period}
                   type="button"
-                  className={
-                    selectedPeriod === period ? 'active' : ''
-                  }
+                  className={selectedPeriod === period ? 'active' : ''}
                   aria-pressed={selectedPeriod === period}
                   onClick={() => setSelectedPeriod(period)}
                 >
@@ -166,16 +207,51 @@ function App() {
           </div>
         </div>
 
+        <div className="demo-controls">
+          <label htmlFor="demo-scenario">
+            Cenário de demonstração:
+          </label>
+
+          <select
+            id="demo-scenario"
+            value={scenario}
+            onChange={(event) =>
+              setScenario(event.target.value as MockScenario)
+            }
+          >
+            <option value="normal">Normal</option>
+            <option value="error">Erro simulado</option>
+            <option value="empty">Histórico vazio</option>
+          </select>
+        </div>
+
         <h3>
           {selectedMetric === 'level'
             ? 'Nível do rio (m)'
             : 'Precipitação (mm/h)'}
         </h3>
 
-        <HistoryChart
-          observations={filteredObservations}
-          metric={selectedMetric}
-        />
+        {status === 'loading' && (
+          <div className="history-feedback" role="status">
+            Carregando histórico...
+          </div>
+        )}
+
+        {status === 'error' && (
+          <div className="history-feedback error-feedback" role="alert">
+            <p>{errorMessage}</p>
+            <button type="button" onClick={retryHistory}>
+              Tentar novamente
+            </button>
+          </div>
+        )}
+
+        {status === 'success' && (
+          <HistoryChart
+            observations={observations}
+            metric={selectedMetric}
+          />
+        )}
 
         <p className="history-note">
           Horários em UTC. Período de demonstração com
@@ -184,9 +260,7 @@ function App() {
       </section>
 
       <footer>
-        <p>
-          Dados simulados — sem finalidade operacional.
-        </p>
+        <p>Dados simulados — sem finalidade operacional.</p>
       </footer>
     </main>
   )
