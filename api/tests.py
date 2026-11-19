@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from monitoring.models import Observation, Station
+from api.models import Observation, Station
 
 
 class StationSummaryTests(APITestCase):
