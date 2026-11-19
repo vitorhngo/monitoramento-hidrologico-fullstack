@@ -1,7 +1,7 @@
 from datetime import timezone as dt_timezone
 
 from rest_framework import serializers
-from monitoring.models import Station, Observation
+from api.models import Station, Observation
 
 
 # Serializer para o modelo Station — converte instâncias <-> representações JSON/HTTP
