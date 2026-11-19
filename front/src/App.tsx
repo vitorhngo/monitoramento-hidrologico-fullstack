@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { mockStations } from './data/stations'
+import { mockSummaries } from './data/summaries'
+import MeasurementCard from './components/MeasurementCard'
 import './App.css'
 
 function App() {
@@ -8,6 +10,10 @@ function App() {
 
   const selectedStation = mockStations.find(
     (station) => station.id === selectedStationId
+  )
+
+  const selectedSummary = mockSummaries.find(
+    (summary) => summary.stationId === selectedStationId
   )
 
   return (
@@ -59,10 +65,24 @@ function App() {
 
       <section aria-labelledby="resumo-titulo">
         <h2 id="resumo-titulo">Resumo das leituras</h2>
-        <p>
-          Aqui serão exibidos os dados mais recentes
-          de nível do rio e precipitação.
-        </p>
+
+        {selectedSummary ? (
+          <div className="measurements-grid">
+            <MeasurementCard
+              title="Nível do rio"
+              measurement={selectedSummary.level}
+              unit="m"
+            />
+
+            <MeasurementCard
+              title="Precipitação"
+              measurement={selectedSummary.rain}
+              unit="mm/h"
+            />
+          </div>
+        ) : (
+          <p>Não há resumo disponível para esta estação.</p>
+        )}
       </section>
 
       <section aria-labelledby="historico-titulo">
