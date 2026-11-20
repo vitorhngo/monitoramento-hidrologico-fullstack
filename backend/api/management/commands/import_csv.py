@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
-from api.models import Observation, Station # Modelos que representam as tabelas do banco de dados.
+from backend.api.models import Observation, Station # Modelos que representam as tabelas do banco de dados.
 
 
 # Colunas obrigatórias de cada CSV.
@@ -26,7 +26,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         # Define os caminhos dos CSVs a partir da pasta raiz do projeto.
-        data_dir = Path(settings.BASE_DIR) / "api" / "data"
+        data_dir = Path(settings.BASE_DIR) / "backend" / "api" / "data"
         stations_path = data_dir / "stations.csv"
         observations_path = data_dir / "observations.csv"
 

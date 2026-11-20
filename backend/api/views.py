@@ -5,7 +5,7 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiRespon
 from rest_framework import viewsets, status # viewsets para criar CRUD da API automaticamente
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from api.models import Station, Observation # modelos do app monitoring
+from backend.api.models import Station, Observation # modelos do app monitoring
 from .serializers import StationSerializer, ObservationPointSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from .filters import StationFilter

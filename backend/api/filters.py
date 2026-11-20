@@ -1,5 +1,5 @@
 import django_filters
-from api.models import Station
+from backend.api.models import Station
 
 
 class StationFilter(django_filters.FilterSet):

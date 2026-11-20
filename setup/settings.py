@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'monitoring',
-    'api',
+    'backend.api',
     'drf_spectacular',
     'drf_spectacular_sidecar',
     'rest_framework.authtoken',
