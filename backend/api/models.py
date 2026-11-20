@@ -10,6 +10,7 @@ class Station(models.Model):
     municipality = models.CharField(max_length=100)
 
     class Meta:
+        db_table = 'station'
         ordering = ["id"]
         constraints = [
             # Garante que o seed não duplique estações
@@ -57,6 +58,7 @@ class Observation(models.Model):
     )
 
     class Meta:
+        db_table = 'observation'
         ordering = ["observed_at", "id"]
         indexes = [
             # Acelera o histórico filtrado por estação, métrica e período

@@ -15,7 +15,7 @@ API REST desenvolvida com Django e Django REST Framework para consultar dados si
 ### 1.1. Clonar o repositório
 
 ```bash
-git clone https://github.com/vitorhngo/monitoramento-hidrologico.git
+git clone https://github.com/vitorhngo/monitoramento-hidrologico-fullstack.git
 cd monitoramento-hidrologico
 ```
 
@@ -62,13 +62,14 @@ python -c 'from django.core.management.utils import get_random_secret_key; print
 ## 2. Preparar o banco de dados
 
 ```bash
+python manage.py makemigrations # Apenas uma vez
 python manage.py migrate
 ```
 
 ### 2.1. Gerar e importar os dados
 
 ```bash
-python scripts/seed.py
+python backend/api/scripts/seed.py
 python manage.py import_csv
 ```
 
