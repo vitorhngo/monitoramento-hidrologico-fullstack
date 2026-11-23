@@ -25,6 +25,5 @@ urlpatterns = [
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
     path('api/', include('api.urls')), # inclui as rotas do app 'api' sob o prefixo /api/
-    path("", include("monitoring.urls")),
     path('api/token/', obtain_auth_token),  # POST com username e password devolve o token
 ]
