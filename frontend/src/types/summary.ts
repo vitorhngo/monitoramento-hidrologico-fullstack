@@ -1,10 +1,18 @@
-export type Measurement = {
-  value: number | null
-  timestamp: string | null
+// Correspondem à estrutura de resposta do resumo da API.
+import type { Station } from "./station";
+
+export interface LatestReading {
+    observed_at: string;
+    value: number;
+    unit: string;
 }
 
-export type StationSummary = {
-  stationId: number
-  level: Measurement
-  rain: Measurement
+export interface Summary {
+    is_simulated: boolean;
+    station: Station;
+
+    latest_readings: {
+        level: LatestReading | null;
+        rain: LatestReading | null;
+    };
 }
