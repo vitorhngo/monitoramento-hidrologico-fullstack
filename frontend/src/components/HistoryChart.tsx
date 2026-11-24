@@ -12,14 +12,15 @@ import {
 
 import type {
   Metric,
-  Observation,
+  ObservationPoint,
 } from '../types/series'
 
 type HistoryChartProps = {
-  observations: Observation[]
+  observations: ObservationPoint[]
   metric: Metric
 }
 
+// Formata a data e o horário da observação em UTC.
 function formatDate(timestamp: string): string {
   return new Intl.DateTimeFormat('pt-BR', {
     day: '2-digit',
@@ -35,13 +36,16 @@ function HistoryChart({
   observations,
   metric,
 }: HistoryChartProps) {
+
+  // Adapta os pontos da API ao formato esperado pelo Recharts.
   const chartData = observations.map((observation) => ({
-    time: formatDate(observation.timestamp),
-    value: observation[metric],
+    time: formatDate(observation.observed_at),
+    value: observation.value,
   }))
 
+  // Verifica se existem medições numéricas disponíveis.
   const hasReadings = chartData.some(
-    (point) => point.value !== null
+    (point) => Number.isFinite(point.value)
   )
 
   if (!hasReadings) {

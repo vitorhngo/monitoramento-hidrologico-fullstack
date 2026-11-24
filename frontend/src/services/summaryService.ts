@@ -7,6 +7,6 @@ export async function getSummary(
 ): Promise<Summary> {
 
     return apiFetch<Summary>(
-        `/api/stations/${stationId}/summary/`
+        `/api/stations/${stationId}/summary`
     );
 }

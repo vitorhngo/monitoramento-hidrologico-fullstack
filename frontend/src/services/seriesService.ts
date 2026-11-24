@@ -18,6 +18,6 @@ export async function getObservations(
     });
 
     return apiFetch<ObservationSeries>(
-        `/api/stations/${stationId}/series/?${params}`
+        `/api/stations/${stationId}/series?${params}`
     );
 }

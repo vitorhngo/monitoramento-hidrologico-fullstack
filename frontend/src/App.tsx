@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react'
 
-import { mockStations } from './data/stations'
-import { mockSummaries } from './data/summaries'
-import { getMockHistory } from './services/historyService'
+import { getStations } from './services/stationService'
+import { getSummary } from './services/summaryService'
+import { getObservations } from './services/seriesService'
 
-import type { MockScenario } from './services/historyService'
-import type { Metric, Observation, Period } from './types/series'
+import type { Station } from './types/station'
+import type { Summary } from './types/summary'
+import type {
+  Metric,
+  ObservationPoint,
+} from './types/series'
 
 import MeasurementCard from './components/MeasurementCard'
 import HistoryChart from './components/HistoryChart'
@@ -13,56 +17,112 @@ import HistoryChart from './components/HistoryChart'
 import './App.css'
 
 type HistoryStatus = 'loading' | 'success' | 'error'
+type Period = 12 | 24 | 48
 
 function App() {
-  const [selectedStationId, setSelectedStationId] =
-    useState<number>(mockStations[0].id)
+  const [stations, setStations] = useState<Station[]>([])
+  const [selectedStationId, setSelectedStationId] = useState<string>('')
 
-  const [selectedMetric, setSelectedMetric] =
-    useState<Metric>('level')
+  const [selectedMetric, setSelectedMetric] = useState<Metric>('level')
+  const [selectedPeriod, setSelectedPeriod] = useState<Period>(24)
 
-  const [selectedPeriod, setSelectedPeriod] =
-    useState<Period>(24)
+  const [selectedSummary, setSelectedSummary] = useState<Summary | null>(null)
+  const [observations, setObservations] = useState<ObservationPoint[]>([])
 
-  const [scenario, setScenario] =
-    useState<MockScenario>('normal')
-
-  const [status, setStatus] =
-    useState<HistoryStatus>('loading')
-
-  const [observations, setObservations] =
-    useState<Observation[]>([])
+  const [stationsLoading, setStationsLoading] = useState(true)
+  const [summaryLoading, setSummaryLoading] = useState(false)
+  const [status, setStatus] = useState<HistoryStatus>('loading')
 
   const [errorMessage, setErrorMessage] = useState('')
-
+  const [summaryError, setSummaryError] = useState('')
   const [retryCount, setRetryCount] = useState(0)
 
-  const selectedStation = mockStations.find(
+  // Localiza a estação selecionada na lista recebida da API.
+  const selectedStation = stations.find(
     (station) => station.id === selectedStationId
   )
 
-  const selectedSummary = mockSummaries.find(
-    (summary) => summary.stationId === selectedStationId
-  )
-
+  // Busca as estações disponíveis assim que a aplicação é iniciada.
   useEffect(() => {
     let cancelled = false
 
-    // Impede mostrar dados antigos durante outra consulta.
+    getStations()
+      .then((data) => {
+        if (cancelled) return
+
+        setStations(data)
+
+        // Seleciona a primeira estação retornada pela API.
+        if (data.length > 0) {
+          setSelectedStationId(data[0].id)
+        }
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return
+
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : 'Não foi possível carregar as estações.'
+        )
+      })
+      .finally(() => {
+        if (!cancelled) setStationsLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  // Busca o resumo sempre que a estação selecionada é alterada.
+  useEffect(() => {
+    if (!selectedStationId) return
+
+    let cancelled = false
+
+    setSummaryLoading(true)
+    setSummaryError('')
+    setSelectedSummary(null)
+
+    getSummary(selectedStationId)
+      .then((data) => {
+        if (!cancelled) setSelectedSummary(data)
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return
+
+        setSummaryError(
+          error instanceof Error
+            ? error.message
+            : 'Não foi possível carregar o resumo da estação.'
+        )
+      })
+      .finally(() => {
+        if (!cancelled) setSummaryLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [selectedStationId])
+
+  // Busca a série histórica conforme estação, métrica e período selecionados.
+  useEffect(() => {
+    if (!selectedStationId) return
+
+    let cancelled = false
+
     setStatus('loading')
     setObservations([])
     setErrorMessage('')
 
-    getMockHistory({
-      stationId: selectedStationId,
-      metric: selectedMetric,
-      period: selectedPeriod,
-      scenario,
-    })
+    getObservations(selectedStationId, selectedMetric, selectedPeriod)
       .then((data) => {
         if (cancelled) return
 
-        setObservations(data)
+        // A API retorna ObservationSeries; o gráfico recebe somente seus pontos.
+        setObservations(data.points)
         setStatus('success')
       })
       .catch((error: unknown) => {
@@ -71,26 +131,31 @@ function App() {
         setErrorMessage(
           error instanceof Error
             ? error.message
-            : 'Ocorreu um erro inesperado.'
+            : 'Não foi possível carregar o histórico.'
         )
-
         setStatus('error')
       })
 
-    // Ignora respostas de consultas que já foram substituídas.
+    // Impede que uma resposta antiga sobrescreva a seleção mais recente.
     return () => {
       cancelled = true
     }
-  }, [
-    selectedStationId,
-    selectedMetric,
-    selectedPeriod,
-    scenario,
-    retryCount,
-  ])
+  }, [selectedStationId, selectedMetric, selectedPeriod, retryCount])
 
   function retryHistory() {
     setRetryCount((previous) => previous + 1)
+  }
+
+  if (stationsLoading) {
+    return <p>Carregando estações...</p>
+  }
+
+  if (stations.length === 0) {
+    return (
+      <main>
+        <p>{errorMessage || 'Nenhuma estação foi encontrada na API.'}</p>
+      </main>
+    )
   }
 
   return (
@@ -113,11 +178,9 @@ function App() {
         <select
           id="station-select"
           value={selectedStationId}
-          onChange={(event) =>
-            setSelectedStationId(Number(event.target.value))
-          }
+          onChange={(event) => setSelectedStationId(event.target.value)}
         >
-          {mockStations.map((station) => (
+          {stations.map((station) => (
             <option key={station.id} value={station.id}>
               {station.name}
             </option>
@@ -131,8 +194,7 @@ function App() {
               <strong>Rio:</strong> {selectedStation.river}
             </p>
             <p>
-              <strong>Município:</strong>{' '}
-              {selectedStation.municipality}
+              <strong>Município:</strong> {selectedStation.municipality}
             </p>
           </div>
         )}
@@ -141,19 +203,29 @@ function App() {
       <section aria-labelledby="resumo-titulo">
         <h2 id="resumo-titulo">Resumo das leituras</h2>
 
-        {selectedSummary ? (
+        {summaryLoading ? (
+          <p>Carregando resumo...</p>
+        ) : summaryError ? (
+          <p role="alert">{summaryError}</p>
+        ) : selectedSummary ? (
           <div className="measurements-grid">
-            <MeasurementCard
-              title="Nível do rio"
-              measurement={selectedSummary.level}
-              unit="m"
-            />
+            {selectedSummary.latest_readings.level ? (
+              <MeasurementCard
+                title="Nível do rio"
+                measurement={selectedSummary.latest_readings.level}
+              />
+            ) : (
+              <p>Não há leitura de nível disponível.</p>
+            )}
 
-            <MeasurementCard
-              title="Precipitação"
-              measurement={selectedSummary.rain}
-              unit="mm/h"
-            />
+            {selectedSummary.latest_readings.rain ? (
+              <MeasurementCard
+                title="Precipitação"
+                measurement={selectedSummary.latest_readings.rain}
+              />
+            ) : (
+              <p>Não há leitura de precipitação disponível.</p>
+            )}
           </div>
         ) : (
           <p>Não há resumo disponível para esta estação.</p>
@@ -207,24 +279,6 @@ function App() {
           </div>
         </div>
 
-        <div className="demo-controls">
-          <label htmlFor="demo-scenario">
-            Cenário de demonstração:
-          </label>
-
-          <select
-            id="demo-scenario"
-            value={scenario}
-            onChange={(event) =>
-              setScenario(event.target.value as MockScenario)
-            }
-          >
-            <option value="normal">Normal</option>
-            <option value="error">Erro simulado</option>
-            <option value="empty">Histórico vazio</option>
-          </select>
-        </div>
-
         <h3>
           {selectedMetric === 'level'
             ? 'Nível do rio (m)'
@@ -247,20 +301,25 @@ function App() {
         )}
 
         {status === 'success' && (
-          <HistoryChart
-            observations={observations}
-            metric={selectedMetric}
-          />
+          observations.length > 0 ? (
+            <HistoryChart
+              observations={observations}
+              metric={selectedMetric}
+            />
+          ) : (
+            <div className="history-feedback">
+              Não há observações disponíveis para o período selecionado.
+            </div>
+          )
         )}
 
         <p className="history-note">
-          Horários em UTC. Período de demonstração com
-          referência em 19/11/2026 às 12:00 UTC.
+          Horários em UTC. Período consultado conforme a seleção realizada.
         </p>
       </section>
 
       <footer>
-        <p>Dados simulados — sem finalidade operacional.</p>
+        <p>Dados fornecidos pela API de monitoramento hidrológico.</p>
       </footer>
     </main>
   )
