@@ -1,167 +1,163 @@
-# Monitoramento Hidrológico — Frontend
+# Frontend — Monitoramento Hidrológico
 
-Interface web do projeto **Monitoramento Hidrológico**, desenvolvida com **React, TypeScript e Vite**. Permite consultar estações hidrológicas fictícias, visualizar as leituras mais recentes de nível do rio e precipitação e explorar gráficos históricos.
+Interface web desenvolvida com **React, TypeScript, Vite e Recharts** para explorar estações hidrológicas fictícias, últimas leituras e históricos de nível de rios e chuva.
 
-> **Atenção:** esta versão utiliza **dados simulados (mock)**, sem finalidade operacional. **Ainda não está integrada à API Python + Django.** Não utilize os valores para monitoramento ou decisões reais.
+> **Estado atual:** o frontend está **integrado à API REST Django** e consulta dados sintéticos persistidos no SQLite. Os dados são fictícios, não correspondem a medições atuais e não possuem finalidade operacional.
 
-## Funcionalidades disponíveis
+## 1. Objetivo e escopo COGMO
 
-- Seleção entre três estações fictícias, com identificação do rio e município.
-- Cartões com a última leitura de **nível do rio (m)** e **precipitação (mm/h)**, incluindo o horário em **UTC**.
-- Gráfico de linha para nível e gráfico de barras para precipitação, usando **Recharts**.
-- Filtros de histórico de **12, 24 e 48 horas**.
-- Tratamento visual de medições ausentes, sem preenchimento artificial das lacunas.
-- Cenários de demonstração: **normal**, **carregamento**, **erro com botão de nova tentativa** e **histórico vazio**.
-- Interface responsiva para desktop e celular e controles acessíveis pelo teclado.
+O Guia de Desafios COGMO solicita uma página que permita selecionar uma estação, identificar rio e município, mostrar últimas leituras e consultar gráficos históricos de nível e chuva. A interface deve tratar estados de carregamento, erro e vazio, ser responsiva e permitir uso por teclado. A integração com o backend é **opcional na proposta original**, e está implementada neste projeto fullstack.
 
-## Pré-requisitos
+## 2. Tecnologias
 
-- **Node.js** e **npm** instalados. Recomenda-se utilizar uma versão **LTS do Node.js** compatível com as dependências do projeto.
-- **Git** instalado para obter ou atualizar o repositório.
-- Um navegador moderno (Chrome, Edge ou Firefox, por exemplo).
+- **React 19:** componentes e estado da interface.
+- **TypeScript 6:** tipos de estação, resumo, métrica e observações.
+- **Vite 8:** servidor de desenvolvimento e compilação.
+- **Recharts 3:** gráficos de nível (linha) e precipitação (barras).
+- **CSS:** estilos e layout responsivo.
 
-Confira a instalação no terminal:
+Versões de dependências conforme `frontend/package.json` na branch `develop`; versões efetivamente instaladas seguem o lockfile.
 
-```powershell
-node -v
-npm.cmd -v
-```
-
-> No **PowerShell do Windows**, pode ser necessário usar `npm.cmd` no lugar de `npm`, caso a política de execução bloqueie o arquivo `npm.ps1`. Os comandos a seguir usam `npm.cmd`. No macOS/Linux, use `npm`.
-
-## Instalação
-
-### 1. Obter o repositório
-
-Se ainda não tiver o projeto no computador:
-
-```powershell
-git clone https://github.com/vitorhngo/monitoramento-hidrologico-fullstack.git
-cd monitoramento-hidrologico-fullstack
-```
-
-Se já tiver clonado o projeto, entre na pasta local do repositório e atualize a branch utilizada pela equipe. **Caso a equipe esteja trabalhando diretamente na `main` e você não tenha alterações locais pendentes**, execute:
-
-```powershell
-git pull origin main
-```
-
-### 2. Entrar na pasta do frontend
-
-A partir da raiz do repositório:
-
-```powershell
-cd front
-```
-
-### 3. Instalar as dependências
-
-```powershell
-npm.cmd ci
-```
-
-O comando `npm.cmd ci` usa o arquivo `package-lock.json` para instalar as versões registradas pela equipe. Se o lockfile estiver ausente ou inconsistente, verifique com a equipe antes de substituí-lo; `npm.cmd install` pode atualizar o lockfile.
-
-> **Não é necessário executar `npm create vite` novamente.** A aplicação React já está criada na pasta `front/`.
-
-## Executar localmente
-
-Dentro da pasta `front/`, execute:
-
-```powershell
-npm.cmd run dev
-```
-
-Abra no navegador o endereço exibido no terminal, geralmente:
+## 3. Organização e arquitetura
 
 ```text
-http://localhost:5173/
-```
-
-Se a porta `5173` estiver ocupada, o Vite poderá usar outra, como `http://localhost:5174/`. Utilize **sempre a URL mostrada no terminal**.
-
-Para parar o servidor, pressione **Ctrl + C** no terminal onde ele está em execução.
-
-**O backend Django não precisa estar em execução para esta versão com dados simulados.**
-
-## Como testar as funcionalidades
-
-1. **Estações:** selecione cada estação e verifique a mudança do nome, rio, município, resumo e histórico.
-2. **Resumo:** confira o nível em `m`, a precipitação em `mm/h` e os horários em `UTC`. Uma leitura igual a `0` deve aparecer normalmente; uma leitura ausente deve aparecer como indisponível.
-3. **Gráficos:** alterne entre **Nível do rio** (linha) e **Precipitação** (barras).
-4. **Períodos:** teste os filtros **12 h**, **24 h** e **48 h**.
-5. **Cenário normal:** escolha **Normal** no campo *Cenário de demonstração*. O texto *Carregando histórico...* deve aparecer brevemente antes do gráfico.
-6. **Erro:** escolha **Erro simulado**. Confirme a mensagem de falha e o botão **Tentar novamente**. A tentativa será refeita, mas **continuará falhando enquanto o cenário de erro estiver selecionado**.
-7. **Histórico vazio:** escolha **Histórico vazio**. A aplicação deve mostrar uma mensagem de ausência de medições, sem inventar valores.
-8. **Recuperação:** retorne ao cenário **Normal** e verifique que o gráfico reaparece.
-9. **Responsividade e teclado:** teste a visualização em uma largura de aproximadamente **375 px** e navegue pelos controles com `Tab`, `Enter`, `Espaço` e setas, conforme o tipo de controle.
-
-> Os horários e valores do mock são **fixos para demonstração**. Eles não representam medições atuais nem uma série relativa ao horário real do computador.
-
-## Compilar para produção
-
-```powershell
-npm.cmd run build
-```
-
-O Vite gera os arquivos na pasta `front/dist/`. Uma mensagem como **`built in ...`** indica que a compilação terminou. Avisos sobre arquivos JavaScript maiores que 500 kB são recomendações de otimização, **não erros de compilação**.
-
-Para testar localmente a versão compilada:
-
-```powershell
-npm.cmd run preview
-```
-
-Abra a URL informada no terminal. O comando `preview` não substitui uma configuração adequada de hospedagem de produção.
-
-## Organização principal
-
-```text
-front/
-├── public/                    # Arquivos estáticos
+frontend/
+├── public/                     # Arquivos estáticos
 ├── src/
 │   ├── components/
-│   │   ├── HistoryChart.tsx   # Gráficos históricos
-│   │   └── MeasurementCard.tsx # Cartão de leitura
-│   ├── data/
-│   │   ├── series.ts          # Séries históricas simuladas
-│   │   ├── stations.ts        # Estações fictícias
-│   │   └── summaries.ts       # Últimas leituras simuladas
+│   │   ├── HistoryChart.tsx    # Visualização histórica
+│   │   └── MeasurementCard.tsx # Cartões das últimas leituras
 │   ├── services/
-│   │   └── historyService.ts  # Consulta simulada e cenários de teste
-│   ├── types/
-│   │   ├── series.ts
-│   │   ├── station.ts
-│   │   └── summary.ts
-│   ├── App.tsx                 # Página principal
-│   ├── App.css                 # Estilos do painel
+│   │   ├── api.ts              # Cliente HTTP com fetch
+│   │   ├── stationService.ts   # Consulta de estações
+│   │   ├── summaryService.ts   # Consulta de resumo
+│   │   └── seriesService.ts    # Consulta de histórico
+│   ├── types/                  # Tipos de estação, resumo e série
+│   ├── App.tsx                 # Estado e composição da página
+│   ├── App.css                 # Estilos da página
 │   ├── index.css               # Estilos globais
-│   └── main.tsx                # Inicialização do React
-├── package.json               # Scripts e dependências
-├── package-lock.json          # Versões travadas das dependências
+│   └── main.tsx                # Inicialização
+├── .env.example               # URL base da API
+├── package.json
+├── package-lock.json
 └── vite.config.ts
 ```
 
-## Problemas comuns
+### Fluxo atual de dados
 
-| Sintoma | O que verificar |
+```text
+SQLite -> Django REST API -> api.ts (fetch)
+                               |
+                               +--> stationService -> App.tsx -> seletor
+                               +--> summaryService -> App.tsx -> MeasurementCard
+                               +--> seriesService  -> App.tsx -> HistoryChart
+```
+
+O `App.tsx` utiliza `useState` e três efeitos: consulta estações na inicialização, consulta o resumo quando a estação muda e consulta o histórico quando estação, métrica, período ou tentativa mudam. A primeira estação retornada é selecionada automaticamente. A lógica de cancelamento ignora respostas antigas. O gráfico recebe `points` da resposta da série.
+
+## 4. Requisitos funcionais da interface
+
+| ID | Requisito do guia | Situação no frontend consultado |
+| --- | --- | --- |
+| RF-F01 | Selecionar estação e identificar rio e município | Implementado |
+| RF-F02 | Mostrar últimas leituras, unidades e horários | Implementado via API |
+| RF-F03 | Alternar histórico de nível e chuva, em gráficos separados | Implementado |
+| RF-F04 | Selecionar histórico de 12, 24 ou 48 horas | Implementado |
+| RF-F05 | Exibir carregamento | Implementado |
+| RF-F06 | Exibir erro e opção de nova tentativa | Implementado para histórico; estações e resumo exibem erros sem botão de nova tentativa |
+| RF-F07 | Informar quando o histórico estiver vazio | Implementado |
+| RF-F08 | Identificar dados simulados e horários/unidades | Parcial: horários e unidades indicados; aviso explícito de simulação precisa ser restaurado |
+| RF-F09 | Funcionar em dispositivos móveis e desktop e com teclado | Estrutura implementada; validação manual recomendada |
+
+### Requisitos de qualidade e experiência
+
+- **Legibilidade:** rótulos e unidades visíveis; nível em `m` e precipitação em `mm/h`.
+- **Acessibilidade:** controles HTML interativos, rótulos e indicadores de estado; conferir navegação real por teclado e leitores de tela.
+- **Responsividade:** testar desktop e largura móvel (por exemplo, 375 px).
+- **Confiabilidade visual:** mostrar ausência de medições sem inventar valores; distinguir zero de dado ausente.
+- **Transparência:** indicar expressamente que a amostra é simulada e que os horários são UTC.
+- **Recuperação de falhas:** disponibilizar botão de nova tentativa em caso de falha na consulta do histórico.
+
+Esses itens derivam do guia e da interface consultada; não representam uma auditoria de acessibilidade ou testes automatizados executados nesta análise.
+
+## 5. Estados e demonstração
+
+| Cenário | Comportamento esperado |
 | --- | --- |
-| `node` não é reconhecido | Instale o Node.js e reabra o VS Code e o terminal; confira `node -v`. |
-| `npm.ps1` bloqueado no PowerShell | Use `npm.cmd` em vez de `npm`. Não é necessário desabilitar a política de segurança. |
-| `Port 5173 is in use` | Não é necessariamente um erro; abra a nova URL indicada pelo Vite. |
-| Módulos não encontrados | Dentro de `front/`, execute `npm.cmd ci` e tente novamente. |
-| Página sem estilos | Confirme a existência e as importações de `src/App.css` e `src/index.css`; atualize o navegador com `Ctrl + Shift + R`. |
-| Gráfico não aparece | Verifique o cenário de demonstração selecionado e mensagens no console do navegador. |
+| Normal | Exibe estações, resumo e gráfico recebidos da API |
+| Carregamento | Mostra mensagens durante as consultas |
+| Erro | Exibe falha; o histórico oferece “Tentar novamente” |
+| Histórico vazio | Informa ausência de medições, sem fabricar pontos |
 
-## Repositório e trabalho em equipe
+Os estados decorrem das requisições HTTP; o seletor de cenários simulados não está presente no `App.tsx` atual. O período é relativo ao horário do servidor Django.
 
-Repositório: https://github.com/vitorhngo/monitoramento-hidrologico-fullstack
+## 6. Instalação
 
-- Versione os arquivos de código, `package.json` e `package-lock.json`.
-- **Não envie** `node_modules/` nem `dist/` ao GitHub. Confirme as regras de `.gitignore`.
-- Combine com a equipe a branch de trabalho e o fluxo de revisão antes de enviar alterações.
-- O projeto existente em Python + Django continua no repositório; há um plano futuro de reorganizar seus arquivos na pasta `backend/`, mas essa mudança não é necessária para executar o frontend atual.
+Pré-requisitos: Node.js e npm compatíveis com o projeto, Git e navegador moderno. Recomenda-se Node.js LTS que satisfaça os requisitos das dependências instaladas.
 
-## Próxima etapa
+```bash
+git clone --branch develop https://github.com/vitorhngo/monitoramento-hidrologico-fullstack.git
+cd monitoramento-hidrologico-fullstack/frontend
+npm ci
+```
 
-Integrar a interface à **API REST Python + Django**, verificando os contratos reais de resposta, formatos de data, unidades, tratamento de erros e CORS. Até essa integração, o frontend opera exclusivamente no modo simulado.
+Copie `.env.example` para `.env` dentro de `frontend/` e configure:
+
+```dotenv
+VITE_API_BASE_URL=http://127.0.0.1:8000
+```
+
+Prepare e inicie o backend conforme [backend/README.md](../backend/README.md). Em outro terminal, dentro de `frontend/`:
+
+```bash
+npm run dev
+```
+
+Abra a URL apresentada no terminal (geralmente `http://localhost:5173/`). Se a porta estiver ocupada, o Vite poderá informar outra. O backend deve permanecer em execução. Se o Vite mudar de porta, ajuste as origens CORS no Django ou utilize a porta 5173.
+
+No PowerShell, se `npm.ps1` for bloqueado, utilize `npm.cmd ci` e `npm.cmd run dev` em vez de modificar a política de execução.
+
+### Comandos úteis
+
+| Comando | Finalidade |
+| --- | --- |
+| `npm run dev` | Servidor local com atualização automática |
+| `npm run build` | Verificação TypeScript e build de produção |
+| `npm run preview` | Prévia local do build |
+| `npm run lint` | Análise estática com ESLint |
+
+## 7. Roteiro de validação manual
+
+1. Selecionar cada uma das três estações e verificar nome, rio, município e cartões.
+2. Alternar `Nível do rio` e `Precipitação` e conferir os tipos de gráfico e as unidades.
+3. Testar períodos de 12, 24 e 48 horas.
+4. Observar o estado de carregamento durante uma consulta HTTP.
+5. Com a página carregada, interromper o backend e alterar o período; verificar o erro do histórico, reiniciar o backend e acionar “Tentar novamente”.
+6. Em um banco de teste com estação sem observações no período, verificar a mensagem de histórico vazio e a ausência de pontos artificiais.
+7. Verificar horários UTC, valores iguais a zero e ausência de dados.
+8. Testar largura móvel e navegação com `Tab`, `Enter`, `Espaço` e setas quando aplicável.
+
+## 8. Integração com Django
+
+A proposta COGMO define o seguinte contrato principal:
+
+| Rota | Uso na interface |
+| --- | --- |
+| `GET /api/stations` | Alimentar o seletor de estações |
+| `GET /api/stations/{id}/summary` | Alimentar os cartões |
+| `GET /api/stations/{id}/series?metric=level&hours=24` | Alimentar o gráfico de nível |
+| `GET /api/stations/{id}/series?metric=rain&hours=24` | Alimentar o gráfico de chuva |
+
+O cliente `apiFetch<T>` em `services/api.ts` concatena `VITE_API_BASE_URL` ao endpoint, executa `fetch`, verifica `response.ok` e converte a resposta JSON. Os serviços de estação, resumo e série são utilizados pelo `App.tsx`. Os identificadores são textuais, como `EST-01`; os cartões usam `latest_readings` e o gráfico usa `points`. As consultas são públicas e não exigem token.
+
+O backend permite via CORS as origens `http://localhost:5173` e `http://127.0.0.1:5173`. A configuração implementada usa `VITE_API_BASE_URL`, não a convenção `VITE_API_MODE=real` do starter citado no guia.
+
+## 9. Limitações
+
+Não há ingestão de sensores reais, alertas ou previsões. O rodapé atual informa que os dados vêm da API, mas não explicita que são simulados; recomenda-se restaurar esse aviso para atender ao guia COGMO. A tela é uma demonstração educacional, não uma plataforma de monitoramento operacional.
+
+## Referências
+
+- **01 — Guia de Desafios COGMO Technology**, trilha frontend e integração.
+- **01 — Desafio COGMO**, adaptação acadêmica da solução backend para Python + Django.
+- Código da branch [`develop`](https://github.com/vitorhngo/monitoramento-hidrologico-fullstack/tree/develop), especialmente `frontend/src/App.tsx` e `frontend/package.json`.
