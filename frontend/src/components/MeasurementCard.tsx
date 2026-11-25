@@ -1,11 +1,11 @@
-import type { Measurement } from '../types/summary'
+import type { LatestReading } from '../types/summary'
 
 type MeasurementCardProps = {
   title: string
-  measurement: Measurement
-  unit: string
+  measurement: LatestReading | null
 }
 
+// Formata o horário da última leitura utilizando UTC.
 function formatTimestamp(timestamp: string | null): string {
   if (!timestamp) {
     return 'Horário indisponível'
@@ -27,12 +27,14 @@ function formatTimestamp(timestamp: string | null): string {
 function MeasurementCard({
   title,
   measurement,
-  unit,
 }: MeasurementCardProps) {
-  const hasValue = measurement.value !== null
 
+  // Verifica se existe uma leitura disponível.
+  const hasValue = measurement !== null
+
+  // Formata o valor numérico para apresentação.
   const formattedValue = hasValue
-    ? measurement.value!.toLocaleString('pt-BR', {
+    ? measurement.value.toLocaleString('pt-BR', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       })
@@ -44,11 +46,11 @@ function MeasurementCard({
 
       <p className="measurement-value">
         {formattedValue}
-        {hasValue && <span> {unit}</span>}
+        {hasValue && <span> {measurement.unit}</span>}
       </p>
 
       <p className="measurement-time">
-        {formatTimestamp(measurement.timestamp)}
+        {formatTimestamp(measurement?.observed_at ?? null)}
       </p>
     </article>
   )

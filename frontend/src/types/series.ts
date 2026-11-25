@@ -1,14 +1,17 @@
-export type Metric = 'level' | 'rain'
+// Correspondem à estrutura de resposta da série histórica da API.
+export type Metric = "level" | "rain";
 
-export type Period = 12 | 24 | 48
-
-export type Observation = {
-  timestamp: string
-  level: number | null
-  rain: number | null
+export interface ObservationPoint {
+    observed_at: string;
+    value: number;
 }
 
-export type StationSeries = {
-  stationId: number
-  observations: Observation[]
+export interface ObservationSeries {
+    station_id: string;
+    metric: Metric;
+    unit: string;
+    hours: number;
+    simulated: boolean;
+    source: string;
+    points: ObservationPoint[];
 }
