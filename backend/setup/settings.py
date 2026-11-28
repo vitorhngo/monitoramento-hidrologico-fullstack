@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'drf_redesign', # Tema moderno(bootstrap 5) e responsivo para a Browsable API;
     'rest_framework',
     'django_filters',
     'api',
