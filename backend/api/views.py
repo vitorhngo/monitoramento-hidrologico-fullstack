@@ -1,7 +1,5 @@
 from datetime import timedelta
-
 from django.utils import timezone
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiResponse
 from rest_framework import viewsets, status # viewsets para criar CRUD da API automaticamente
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -11,7 +9,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .filters import StationFilter
 from rest_framework.renderers import JSONRenderer
 from .renderers import SeriesBrowsableRenderer
-
+from .schemas import (station_series_schema, station_summary_schema,)
 from django.shortcuts import redirect  # Redireciona o navegador para outra rota.
 from django.urls import reverse  # Obtém a URL a partir do nome de uma rota.
 from rest_framework.renderers import BrowsableAPIRenderer  # Identifica requisições feitas pela interface HTML do DRF.
@@ -36,8 +34,38 @@ class StationViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]  # habilita filtragem via django-filter
     filterset_class = StationFilter
 
-    # Na tela do DRF, o link "Series" do menu "Ações Extras" passa a vir com metric e hours preenchidos,
-    # em vez de abrir a URL sem parâmetros (que retornaria erro 400).
+    # GET /api/stations/{id}/summary
+    @station_summary_schema
+    @action(detail=True, methods=["get"], url_path="summary")
+    def summary(self, request, pk=None):
+        station = self.get_object() # Identifica a estação pelo ID informado na URL e retorna HTTP 404 caso a estação não exista.
+        latest_readings = {} # Armazena a última leitura encontrada de cada métrica.
+
+        for metric in (Observation.Metric.LEVEL, Observation.Metric.RAIN):
+            observation = (
+                Observation.objects.filter(station=station, metric=metric) # Filtra as observações pela estação e pela métrica.
+                .order_by("-observed_at", "-id") # Ordena da mais recente para a mais antiga.
+                .first() # Recupera somente o primeiro registro.
+            )
+
+            # Se existir uma observação, armazena seus dados.Caso contrário, retorna None para indicar ausência de leitura.
+            latest_readings[metric] = (
+                {
+                    "value": observation.value,
+                    "unit": observation.unit,
+                    "observed_at": observation.observed_at,
+                }
+                if observation is not None
+                else None
+            )
+
+        return Response({
+            "is_simulated": True,
+            "station": self.get_serializer(station).data,
+            "latest_readings": latest_readings,
+        })
+
+    # Adiciona query params padrão (metric e hours) na action "Series" do DRF para evitar erro 400.
     def get_extra_action_url_map(self):
         urls = super().get_extra_action_url_map()
         for name, url in list(urls.items()):
@@ -46,66 +74,9 @@ class StationViewSet(viewsets.ModelViewSet):
         return urls
 
 
-    # Personaliza a resposta filtro id
-    def list(self, request, *args, **kwargs):
-
-        station_id = request.query_params.get('id')
-
-        is_browsable = isinstance(
-            request.accepted_renderer,
-            BrowsableAPIRenderer
-        )
-
-        if station_id and is_browsable:
-
-            station = self.get_queryset().filter(
-                pk=station_id
-            ).first()
-
-            if station:
-                url = reverse(
-                    'station-detail',
-                    kwargs={'pk': station.pk}
-                )
-
-                return redirect(url)
-
-        return super().list(request, *args, **kwargs)
-
-    
     # GET /api/stations/{id}/series?metric=level&hours=24 
     # GET /api/stations/{id}/series?metric=rain&hours=24
-    # Personaliza a documentação do endpoint no padrão OpenAPI,definindo descrição, parâmetros aceitos e possíveis respostas HTTP.
-    # Essas informações são exibidas no Swagger e no ReDoc.
-    @extend_schema(
-        summary="Histórico de nível ou chuva de uma estação",
-        description=(
-            "Devolve as leituras da estação, em ordem de horário (UTC), "
-            "para a métrica e a janela de horas escolhidas. Dados simulados."
-        ),
-        parameters=[
-            OpenApiParameter(
-                name='metric',
-                type=str,
-                location=OpenApiParameter.QUERY,
-                required=True,
-                enum=['level', 'rain'],
-                description="Métrica: 'level' (nível, em m) ou 'rain' (chuva, em mm/h).",
-            ),
-            OpenApiParameter(
-                name='hours',
-                type={'type': 'integer', 'minimum': 1, 'maximum': 72, 'default': 24},
-                location=OpenApiParameter.QUERY,
-                required=False,
-                description="Janela de tempo em horas, de 1 a 72. Padrão: 24.",
-            ),
-        ],
-        responses={
-            200: OpenApiResponse(description="Série histórica da estação."),
-            400: OpenApiResponse(description="Parâmetro 'metric' ou 'hours' inválido."),
-            404: OpenApiResponse(description="Estação não encontrada."),
-        },
-    )
+    @station_series_schema
     @action(
         detail=True,
         methods=['get'],
@@ -161,32 +132,28 @@ class StationViewSet(viewsets.ModelViewSet):
             'points': ObservationPointSerializer(observations, many=True).data, 
         })
 
-    # GET /api/stations/{id}/summary
-    @action(detail=True, methods=["get"], url_path="summary")
-    def summary(self, request, pk=None):
-        station = self.get_object() # Identifica a estação pelo ID informado na URL e retorna HTTP 404 caso a estação não exista.
-        latest_readings = {} # Armazena a última leitura encontrada de cada métrica.
+    # Personaliza a resposta filtro id
+    def list(self, request, *args, **kwargs):
 
-        for metric in (Observation.Metric.LEVEL, Observation.Metric.RAIN):
-            observation = (
-                Observation.objects.filter(station=station, metric=metric) # Filtra as observações pela estação e pela métrica.
-                .order_by("-observed_at", "-id") # Ordena da mais recente para a mais antiga.
-                .first() # Recupera somente o primeiro registro.
-            )
+        station_id = request.query_params.get('id')
 
-            # Se existir uma observação, armazena seus dados.Caso contrário, retorna None para indicar ausência de leitura.
-            latest_readings[metric] = (
-                {
-                    "value": observation.value,
-                    "unit": observation.unit,
-                    "observed_at": observation.observed_at,
-                }
-                if observation is not None
-                else None
-            )
+        is_browsable = isinstance(
+            request.accepted_renderer,
+            BrowsableAPIRenderer
+        )
 
-        return Response({
-            "is_simulated": True,
-            "station": self.get_serializer(station).data,
-            "latest_readings": latest_readings,
-        })
+        if station_id and is_browsable:
+
+            station = self.get_queryset().filter(
+                pk=station_id
+            ).first()
+
+            if station:
+                url = reverse(
+                    'station-detail',
+                    kwargs={'pk': station.pk}
+                )
+
+                return redirect(url)
+
+        return super().list(request, *args, **kwargs)
