@@ -1,0 +1,640 @@
+/* =========================================================
+   Página inicial — estilos (portados da antiga home em Django)
+   Todos os seletores ficam dentro de .home para não vazar para o painel.
+   ========================================================= */
+
+.home {
+    color-scheme: light;
+    --ink: #142b3b;
+    --muted: #607383;
+    --blue: #126782;
+    --blue-dark: #0b4056;
+    --aqua: #dff3f2;
+    --paper: #f5f8fa;
+    --line: #dce6eb;
+    --white: #fff;
+}
+
+.home * {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+.home {
+    margin: 0;
+    color: var(--ink);
+    background: var(--paper);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.65;
+}
+
+.home a {
+    color: inherit;
+}
+
+.home .container {
+    width: min(1120px, calc(100% - 40px));
+    margin: 0 auto;
+}
+
+/* Navegação */
+.home .topbar {
+    background: var(--white);
+    border-bottom: 1px solid var(--line);
+}
+
+.home .nav {
+    min-height: 76px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.home .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    font-weight: 800;
+    letter-spacing: -.03em;
+}
+
+.home .brand-mark {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border-radius: 13px;
+    color: white;
+    background: var(--blue);
+    font-size: 21px;
+}
+
+.home .nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    color: var(--muted);
+    font-size: .92rem;
+}
+
+.home .nav-links a {
+    text-decoration: none;
+}
+
+.home .nav-links a:hover {
+    color: var(--blue);
+}
+
+/* Seção principal */
+.home .hero {
+    padding: 82px 0 76px;
+    color: white;
+    background: radial-gradient(circle at 85% 15%, #247f91 0, transparent 30%), linear-gradient(120deg, #0b4056, #126782 68%, #17818a);
+}
+
+.home .hero-grid {
+    display: grid;
+    grid-template-columns: 1.35fr .65fr;
+    align-items: center;
+    gap: 56px;
+}
+
+.home .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border: 1px solid #ffffff55;
+    border-radius: 99px;
+    color: #d9f5f4;
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.home h1 {
+    max-width: 720px;
+    margin: 20px 0 18px;
+    font-size: clamp(2.4rem, 5vw, 4.6rem);
+    line-height: 1.04;
+    letter-spacing: -.055em;
+}
+
+.home .hero p {
+    max-width: 660px;
+    margin: 0;
+    color: #e1f0f3;
+    font-size: 1.12rem;
+}
+
+.home .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.home .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 46px;
+    padding: 0 19px;
+    border-radius: 9px;
+    font-weight: 750;
+    text-decoration: none;
+    transition: transform .18s, background .18s;
+}
+
+.home .button:hover {
+    transform: translateY(-2px);
+}
+
+.home .button-light {
+    color: var(--blue-dark);
+    background: white;
+}
+
+.home .button-outline {
+    color: white;
+    border: 1px solid #ffffff88;
+}
+
+.home .hero-art {
+    min-height: 260px;
+    display: grid;
+    place-items: center;
+}
+
+.home .water-card {
+    width: min(100%, 300px);
+    padding: 26px;
+    border: 1px solid #ffffff45;
+    border-radius: 24px;
+    background: #ffffff16;
+    box-shadow: 0 24px 70px #062d3b44;
+    transform: rotate(3deg);
+}
+
+.home .water-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 88px;
+    line-height: 1.2;
+}
+
+.home .water-icon img {
+    display: block;
+    width: 105px;
+    height: 105px;
+    object-fit: contain;
+}
+
+.home .feature-icon img {
+    display: block;
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+}
+
+.home .water-card strong {
+    display: block;
+    margin-top: 14px;
+    font-size: 1.1rem;
+}
+
+.home .water-card span {
+    color: #d9edf0;
+    font-size: .88rem;
+}
+
+/* Estrutura geral das seções */
+.home section {
+    padding: 76px 0;
+}
+
+.home .section-head {
+    max-width: 720px;
+    margin-bottom: 34px;
+}
+
+.home .kicker {
+    color: var(--blue);
+    font-size: .76rem;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.home h2 {
+    margin: 8px 0 10px;
+    font-size: clamp(1.8rem, 3vw, 2.65rem);
+    line-height: 1.15;
+    letter-spacing: -.04em;
+}
+
+.home .section-head p,
+.home .muted {
+    color: var(--muted);
+}
+
+/* Cartões de apresentação */
+.home .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.home .feature,
+.home .person,
+.home .institution {
+    padding: 24px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: white;
+}
+
+.home .feature-icon {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    color: var(--blue);
+    background: var(--aqua);
+    font-size: 1.35rem;
+}
+
+.home h3 {
+    margin: 15px 0 7px;
+    font-size: 1.1rem;
+}
+
+.home .feature p,
+.home .institution p,
+.home .person p {
+    margin: 0;
+    color: var(--muted);
+    font-size: .94rem;
+}
+
+/* Repositório */
+.home .repository-section {
+    padding: 42px 0;
+    background: #eaf2f5;
+}
+
+.home .repository-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 26px 30px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: white;
+}
+
+.home .repository-card h2 {
+    margin: 5px 0 8px;
+    font-size: clamp(1.35rem, 2.5vw, 1.8rem);
+}
+
+.home .repository-card p {
+    margin: 0;
+    color: var(--muted);
+}
+
+.home .repository-link {
+    flex-shrink: 0;
+    color: white;
+    background: var(--blue);
+}
+
+.home .repository-link:hover {
+    background: var(--blue-dark);
+}
+
+/* API */
+.home .api-section {
+    background: #eaf2f5;
+}
+
+.home .api-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 34px;
+    align-items: start;
+}
+
+.home .endpoint {
+    padding: 16px 18px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: white;
+}
+
+.home .endpoint-list {
+    display: grid;
+    gap: 12px;
+}
+
+/* GET - Azul */
+.home .endpoint:has(.method-get) {
+    border-color: #61affe;
+    background: #ebf3fb;
+}
+
+/* POST - Verde */
+.home .endpoint:has(.method-post) {
+    border-color: #49cc90;
+    background: #e8f6ef;
+}
+
+/* PUT - Laranja */
+.home .endpoint:has(.method-put) {
+    border-color: #fca130;
+    background: #fff3e4;
+}
+
+/* PATCH - Turquesa */
+.home .endpoint:has(.method-patch) {
+    border-color: #50e3c2;
+    background: #e7f8f4;
+}
+
+/* DELETE - Vermelho */
+.home .endpoint:has(.method-delete) {
+    border-color: #f93e3e;
+    background: #fdeaea;
+}
+
+/* Identificação visual do método */
+.home .method {
+    display: inline-block;
+    min-width: 64px;
+    margin-right: 8px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    color: white;
+    text-align: center;
+    font-size: .76rem;
+    font-weight: 850;
+}
+
+.home .method-get {
+    background: #61affe;
+}
+
+.home .method-post {
+    background: #49cc90;
+}
+
+.home .method-put {
+    background: #fca130;
+}
+
+.home .method-patch {
+    background: #50e3c2;
+}
+
+.home .method-delete {
+    background: #f93e3e;
+}
+
+.home code {
+    color: #21485a;
+    font-size: .88rem;
+    overflow-wrap: anywhere;
+}
+
+.home .note {
+    margin-top: 18px;
+    padding: 16px 18px;
+    border-left: 4px solid #d19a32;
+    border-radius: 8px;
+    background: #fff8e9;
+    color: #73551e;
+    font-size: .9rem;
+}
+
+.home .commom-button {
+    border: 1px solid var(--line);
+    background: white;
+}
+
+/* Equipe */
+.home .team-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.home .person {
+    padding-top: 28px;
+}
+
+.home .avatar {
+    width: 132px;
+    height: 132px;
+    margin-bottom: 18px;
+    overflow: hidden;
+    border: 4px solid #e4f1f3;
+    border-radius: 50%;
+    background: #eaf2f5;
+}
+
+.home .avatar img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.home .person h3 {
+    margin-top: 0;
+}
+
+.home .person-social {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.home .social-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    color: var(--blue-dark);
+    background: white;
+    transition: color .18s, background .18s, transform .18s;
+}
+
+.home .social-link:hover {
+    color: white;
+    background: var(--blue);
+    transform: translateY(-2px);
+}
+
+.home .social-link svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+/* Instituições */
+.home .institutions {
+    background: white;
+}
+
+.home .institution-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.home .institution {
+    background: var(--paper);
+}
+
+.home .institution .tag {
+    color: var(--blue);
+    font-size: .74rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.home .role-status {
+    display: inline-block;
+    margin-top: 10px;
+    color: #8b641b;
+    font-size: .78rem;
+    font-weight: 800;
+}
+
+/* Rodapé */
+.home footer {
+    padding: 28px 0;
+    color: #c8dce2;
+    background: #092f40;
+    font-size: .86rem;
+}
+
+.home footer .container {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    flex-wrap: wrap;
+}
+
+/* Responsividade */
+@media (max-width: 760px) {
+    .home .nav {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 16px 0;
+    }
+
+    .home .nav-links {
+        gap: 12px 18px;
+    }
+
+    .home .hero {
+        padding: 60px 0;
+    }
+
+    .home .hero-grid,
+    .home .api-layout {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .home .hero-art {
+        min-height: 180px;
+    }
+
+    .home section {
+        padding: 56px 0;
+    }
+
+    .home .feature-grid,
+    .home .team-grid,
+    .home .institution-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .home .repository-card {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+/* =========================================================
+   Ajustes da versão em React
+   ========================================================= */
+
+/* O App.css do painel estiliza main, header, section, h2, p e footer pelo nome da tag.
+   Os resets abaixo impedem que esses estilos vazem para a página inicial. */
+.home main {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+}
+
+.home header {
+    color: var(--ink);
+    padding: 0;
+    border-radius: 0;
+    margin-bottom: 0;
+}
+
+.home section {
+    background-color: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    margin-bottom: 0;
+}
+
+.home h2 {
+    color: inherit;
+}
+
+.home p {
+    line-height: inherit;
+}
+
+.home footer {
+    text-align: left;
+}
+
+/* Link "Painel" no menu */
+.home .nav-links {
+    align-items: center;
+}
+
+.home .nav-links .nav-cta {
+    padding: 7px 16px;
+    border-radius: 8px;
+    color: white;
+    background: var(--blue);
+    font-weight: 700;
+}
+
+.home .nav-links .nav-cta:hover {
+    color: white;
+    background: var(--blue-dark);
+}

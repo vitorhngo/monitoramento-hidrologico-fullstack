@@ -269,3 +269,15 @@ footer {
     height: 270px;
   }
 }
+
+/* Link para voltar à página inicial (cabeçalho do painel) */
+.back-link {
+  display: inline-block;
+  margin-bottom: 12px;
+  color: #dbeafe;
+  font-size: 0.95rem;
+}
+
+.back-link:hover {
+  color: #ffffff;
+}
